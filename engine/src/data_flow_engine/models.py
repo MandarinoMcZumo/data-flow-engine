@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field
 class ColumnNames(str, Enum):
     failed_validations = "failed_validations"
 
+
 class SupportedTransformations(str, Enum):
     validate_fields = "validate_fields"
     add_fields = "add_fields"
