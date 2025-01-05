@@ -9,7 +9,7 @@
 ### Para desarrollar:
 
 * python 3.12
-* uv
+* [uv](https://docs.astral.sh/uv/)
 * zip
 
 ## Instrucciones
@@ -55,6 +55,14 @@ En el directorio del proyecto:
 2. Modificar la versión en el archivo [pyproject.toml](engine/pyproject.toml)
 3. `. scripts/build_package.sh`
 4. Ejecutar el dag `spark_package_upload`
+
+## Servicios
+
+* Airflow: `http://localhost:8080/`
+* Spark: `http://localhost:8070/`
+* Kafka: `http://localhost:8090/topics`
+* Hadoop: `http://localhost:9870/`
+
 
 ## Troubleshooting
 
