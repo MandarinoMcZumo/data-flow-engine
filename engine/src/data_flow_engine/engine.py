@@ -10,6 +10,7 @@ from data_flow_engine.models import (
 from data_flow_engine.sources.file import to_file
 from data_flow_engine.sources.kafka import KafkaAgent
 from data_flow_engine.transformations.common import apply_transformations
+from loguru import logger
 from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.functions import (
     struct,
@@ -62,19 +63,28 @@ class WorkFlow:
         Returns:
 
         """
+        logger.info(f"Writting data in topic {topic}...")
         self.kafka_agent.add_topic(topic)
         df.select(to_json(struct("*")).alias("value")).selectExpr(
             "CAST(value AS STRING)"
         ).write.format("kafka").option("kafka.bootstrap.servers", self.kafka_broker).option(
             "topic", topic
         ).save()
+        logger.info(f"Writting data in topic {topic}... DONE")
 
     def read_sources(self, sources: list[DataFlowSource], inputs: dict[str, DataFrame]):
+        logger.info("Reading sources...")
         for source in sources:
-            path = source.path.replace("*", "")
-            hdfs_path = self.get_hdfs_path(path)
-            df = self.read_hdfs(hdfs_path, source.format)
-            inputs[source.name] = df
+            try:
+                logger.info(f"Reading source {source}...")
+                path = source.path.replace("*", "")
+                hdfs_path = self.get_hdfs_path(path)
+                df = self.read_hdfs(hdfs_path, source.format)
+                inputs[source.name] = df
+                logger.info(f"Reading source {source}... DONE")
+            except Exception as e:
+                logger.error(f"Could not read source {source}", e)
+        logger.info("Reading sources... DONE")
 
     def sink(self, sinks: list[KafkaOutput | JsonFileOutput], inputs: dict):
         for sink in sinks:
@@ -89,7 +99,9 @@ class WorkFlow:
                 case SupportedFormats.json:
                     for path in sink.paths:
                         hdfs_path = self.get_hdfs_path(path)
+                        logger.info(f"Writing data into {hdfs_path}...")
                         to_file(df, hdfs_path, "json", sink.save_mode)
+                        logger.info(f"Writing data into {hdfs_path}... DONE")
 
     def run(self):
         """
@@ -97,7 +109,11 @@ class WorkFlow:
         sinks the data for the dataflows object in self.metadata.
         """
         for dataflow in self.metadata.dataflows:
+            logger.info(f"Processing Data Flow {dataflow.name}...")
             inputs: dict[str, DataFrame] = {}
             self.read_sources(sources=dataflow.sources, inputs=inputs)
+            logger.info("Applying transformations...")
             apply_transformations(transformations=dataflow.transformations, inputs=inputs)
+            logger.info("Applying transformations... DONE")
             self.sink(sinks=dataflow.sinks, inputs=inputs)
+            logger.info(f"Processing Data Flow {dataflow.name}... DONE")

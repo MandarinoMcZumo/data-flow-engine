@@ -1,6 +1,6 @@
 [project]
 name = "data-flow-engine"
-version = "0.2.1"
+version = "0.2.3"
 description = ""
 authors = [
     { name = "Luis Albarracin", email = "lalbarracin92@hotmail.com" }
@@ -8,7 +8,8 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "kafka-python-ng>=2.2.3",
+    "confluent-kafka>=2.7.0",
+    "loguru>=0.7.3",
     "pydantic>=2",
     "pyspark==3.5.4",
 ]

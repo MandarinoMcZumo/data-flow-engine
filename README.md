@@ -54,7 +54,12 @@ En el directorio del proyecto:
 1. `cd engine`
 2. Modificar la versión en el archivo [pyproject.toml](engine/pyproject.toml)
 3. `. scripts/build_package.sh`
-4. Ejecutar el dag `spark_package_upload`
+4. Actualizar el archivo [upload_dependencies.py](airflow/dags/upload_dependencies.py) con la nueva versión
+(líneas 20 y 21)
+5. Ejecutar el dag `spark_package_upload`
+6. Actualizar el parámetro `py_files` del SparkSubmitOperator en el
+archivo [data_flow_engine.py](airflow/dags/data_flow_engine.py) con la nueva versión (línea 63)
+
 
 ## Servicios
 
