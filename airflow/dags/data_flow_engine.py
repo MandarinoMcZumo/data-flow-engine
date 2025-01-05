@@ -60,7 +60,7 @@ with DAG(
         conn_id="spark",
         application="/opt/airflow/dags/pipelines/etl.py",
         packages="org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.4",
-        py_files="hdfs://namenode:9000/packages/data_flow_engine-0.2.3.zip",
+        py_files="hdfs://namenode:9000/packages/data_flow_engine-0.2.4.zip",
         application_args=[
             "--metadata",
             json.dumps(metadata),

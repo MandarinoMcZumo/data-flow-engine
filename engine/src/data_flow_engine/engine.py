@@ -112,8 +112,9 @@ class WorkFlow:
             logger.info(f"Processing Data Flow {dataflow.name}...")
             inputs: dict[str, DataFrame] = {}
             self.read_sources(sources=dataflow.sources, inputs=inputs)
-            logger.info("Applying transformations...")
-            apply_transformations(transformations=dataflow.transformations, inputs=inputs)
-            logger.info("Applying transformations... DONE")
+            if dataflow.transformations is not None:
+                logger.info("Applying transformations...")
+                apply_transformations(transformations=dataflow.transformations, inputs=inputs)
+                logger.info("Applying transformations... DONE")
             self.sink(sinks=dataflow.sinks, inputs=inputs)
             logger.info(f"Processing Data Flow {dataflow.name}... DONE")
