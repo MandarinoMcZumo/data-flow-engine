@@ -80,7 +80,9 @@ class DataFlowSource(BaseModel):
 class DataFlowMetadata(BaseModel):
     name: str
     sources: list[DataFlowSource]
-    transformations: list[NewFieldTransformation | ValidationFieldTransformation]
+    transformations: list[NewFieldTransformation | ValidationFieldTransformation] | None = Field(
+        default=None
+    )
     sinks: list[KafkaOutput | JsonFileOutput]
 
 

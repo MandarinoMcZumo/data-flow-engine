@@ -7,6 +7,7 @@ from data_flow_engine.models import (
     KafkaOutput,
     SupportedFormats,
 )
+from data_flow_engine.sources.kafka import KafkaAgent
 from data_flow_engine.transformations.common import apply_transformations
 from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.functions import (
@@ -16,11 +17,7 @@ from pyspark.sql.functions import (
 
 
 def to_file(df: DataFrame, path: str, fmt: str, save_mode: str):
-    df \
-        .write \
-        .format(fmt) \
-        .mode(save_mode) \
-        .save(path)
+    df.write.format(fmt).mode(save_mode).save(path)
 
 
 class WorkFlow:
@@ -30,6 +27,7 @@ class WorkFlow:
         self.hdfs_host: str = hdfs_host
         self.hdfs_port: str = hdfs_port
         self.kafka_broker: str = kafka_broker
+        self.kafka_agent: KafkaAgent = KafkaAgent(bootstrap_servers=kafka_broker)
 
     def get_hdfs_path(self, path: str) -> str:
         return f"hdfs://{self.hdfs_host}:{self.hdfs_port}{path}"
@@ -39,14 +37,12 @@ class WorkFlow:
             return self.spark.read.json(path)
 
     def to_kafka(self, df: DataFrame, topic: str):
-        df \
-            .select(to_json(struct("*")).alias("value")) \
-            .selectExpr("CAST(value AS STRING)") \
-            .write \
-            .format("kafka") \
-            .option("kafka.bootstrap.servers", self.kafka_broker) \
-            .option("topic", topic) \
-            .save()
+        self.kafka_agent.add_topic(topic)
+        df.select(to_json(struct("*")).alias("value")).selectExpr(
+            "CAST(value AS STRING)"
+        ).write.format("kafka").option("kafka.bootstrap.servers", self.kafka_broker).option(
+            "topic", topic
+        ).save()
 
     def read_sources(self, sources: list[DataFlowSource], inputs: dict[str, DataFrame]):
         for source in sources:

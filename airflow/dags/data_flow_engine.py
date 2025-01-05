@@ -40,6 +40,11 @@ with DAG(
     spark_compose = "docker-compose -f /opt/airflow/spark/docker-compose.yaml"
     kafka_compose = "docker-compose -f /opt/airflow/kafka/docker-compose.yaml"
 
+    start_kafka_service = BashOperator(
+        task_id='start_kafka_service',
+        bash_command=f"{kafka_compose} up -d && sleep 60"
+    )
+
     start_hdfs_service = BashOperator(
         task_id='start_hdfs_service',
         bash_command=f"{hdfs_compose} up -d && sleep 60"
@@ -60,7 +65,7 @@ with DAG(
         conn_id='spark',
         application="/opt/airflow/dags/pipelines/etl.py",
         packages='org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.4',
-        py_files='hdfs://namenode:9000/packages/data_flow_engine-0.1.2.zip',
+        py_files='hdfs://namenode:9000/packages/data_flow_engine-0.2.0.zip',
         application_args=["--metadata", json.dumps(metadata),
                           '--kafka_broker', 'redpanda:9092',
                           '--hdfs_host', 'namenode',
@@ -84,5 +89,10 @@ with DAG(
         trigger_rule="all_done"
     )
 
-    [start_hdfs_service, start_spark_service] >> upload_to_hdfs >> spark_job
-    spark_job >> download_from_hdfs >> [stop_hdfs_service, stop_spark_service]
+    stop_kafka_service = BashOperator(
+        task_id='stop_kafka_service',
+        bash_command=f"{kafka_compose} down",
+    )
+
+    [start_hdfs_service, start_spark_service, start_kafka_service] >> upload_to_hdfs >> spark_job
+    spark_job >> download_from_hdfs >> [stop_hdfs_service, stop_spark_service, stop_kafka_service]

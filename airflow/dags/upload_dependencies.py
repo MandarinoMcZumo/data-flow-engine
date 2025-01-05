@@ -18,8 +18,8 @@ with DAG(
     def hdfs_upload():
         client = InsecureClient('http://namenode:9870')
         client.upload(
-            '/packages/data_flow_engine-0.1.2.zip',
-            '/opt/airflow/spark/packages/data_flow_engine-0.1.2.zip',
+            '/packages/data_flow_engine-0.2.0.zip',
+            '/opt/airflow/spark/packages/data_flow_engine-0.2.0.zip',
             overwrite=True
         )
 

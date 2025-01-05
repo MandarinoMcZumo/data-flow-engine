@@ -1,6 +1,6 @@
 [project]
 name = "data-flow-engine"
-version = "0.1.2"
+version = "0.2.0"
 description = ""
 authors = [
     { name = "Luis Albarracin", email = "lalbarracin92@hotmail.com" }
@@ -8,12 +8,16 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "kafka-python-ng>=2.2.3",
     "pydantic>=2",
     "pyspark==3.5.4",
 ]
 packages = [
     { include = "data_flow_engine", from = "src" }
 ]
+
+[tool.ruff]
+line-length = 100
 
 [tool.ruff.lint]
 select = [

@@ -11,8 +11,8 @@ from pyspark.sql import DataFrame
 
 
 def apply_transformations(
-        transformations: list[NewFieldTransformation | ValidationFieldTransformation],
-        inputs: dict[str, DataFrame],
+    transformations: list[NewFieldTransformation | ValidationFieldTransformation],
+    inputs: dict[str, DataFrame],
 ):
     for transformation in transformations:
         params = transformation.params

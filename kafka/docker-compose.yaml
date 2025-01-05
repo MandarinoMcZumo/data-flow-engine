@@ -52,8 +52,8 @@ services:
       - sdg_network
     entrypoint: /bin/sh
     command: -c 'echo "$$CONSOLE_CONFIG_FILE" > /tmp/config.yml; /app/console -config.filepath=${CONFIG_FILEPATH:-/tmp/config.yml}'
-    volumes:
-      - ./config:/tmp/config/
+    # volumes:
+    # - ./config:/tmp/config/
     environment:
       CONFIG_FILEPATH: ${CONFIG_FILEPATH:-/tmp/config.yml}
       CONSOLE_CONFIG_FILE: |
@@ -68,23 +68,5 @@ services:
             urls: ["http://redpanda:9644"]
     ports:
       - 8090:8080
-    depends_on:
-      - redpanda
-
-  topics:
-    image: docker.redpanda.com/redpandadata/redpanda:v24.3.2
-    container_name: redpanda_topics
-    environment:
-      CONSOLE_CONFIG_FILE: |
-        kafka:
-          brokers: ["redpanda:9092"]
-          schemaRegistry:
-            enabled: true
-            urls: ["http://redpanda:8081"]
-        redpanda:
-          adminApi:
-            enabled: true
-            urls: ["http://redpanda:9644"]
-    entrypoint: ["sh", "-c", "rpk topic create person --brokers=http://redpanda:9644 && sleep 5"]
     depends_on:
       - redpanda

@@ -12,29 +12,39 @@ def not_null(df: DataFrame, field: str) -> DataFrame:
         ColumnNames.failed_validations.value,
         when(
             col(field).isNull(),
-            concat(col(ColumnNames.failed_validations.value), array(validation_error))
-        ).otherwise(col(ColumnNames.failed_validations.value))
+            concat(col(ColumnNames.failed_validations.value), array(validation_error)),
+        ).otherwise(col(ColumnNames.failed_validations.value)),
     )
 
 
 def not_empty(df: DataFrame, field: str) -> DataFrame:
-    validation_error = struct(lit(field).alias("field"), lit("Field cannot be empty").alias("error"))
+    validation_error = struct(
+        lit(field).alias("field"), lit("Field cannot be empty").alias("error")
+    )
     return df.withColumn(
         ColumnNames.failed_validations.value,
         when(
             col(field) == "",
-            concat(col(ColumnNames.failed_validations.value), array(validation_error))
-        ).otherwise(col(ColumnNames.failed_validations.value))
+            concat(col(ColumnNames.failed_validations.value), array(validation_error)),
+        ).otherwise(col(ColumnNames.failed_validations.value)),
     )
 
 
-def validate_fields(df: DataFrame, field_validations: list[FieldValidation]) -> dict[str, DataFrame]:
+def validate_fields(
+    df: DataFrame, field_validations: list[FieldValidation]
+) -> dict[str, DataFrame]:
     df = df.withColumn(
         ColumnNames.failed_validations.value,
-        lit([]).cast(ArrayType(StructType([
-            StructField("field", StringType(), True),
-            StructField("error", StringType(), True)
-        ])))
+        lit([]).cast(
+            ArrayType(
+                StructType(
+                    [
+                        StructField("field", StringType(), True),
+                        StructField("error", StringType(), True),
+                    ]
+                )
+            )
+        ),
     )
 
     for field_validation in field_validations:
@@ -46,6 +56,7 @@ def validate_fields(df: DataFrame, field_validations: list[FieldValidation]) -> 
 
     df.cache()
     valid_df = df.filter(df[ColumnNames.failed_validations.value] == lit([])).drop(
-        ColumnNames.failed_validations.value)
+        ColumnNames.failed_validations.value
+    )
     invalid_df = df.filter(df[ColumnNames.failed_validations.value] != lit([]))
-    return {'ok': valid_df, 'ko': invalid_df}
+    return {"ok": valid_df, "ko": invalid_df}
