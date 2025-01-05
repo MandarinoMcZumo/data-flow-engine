@@ -16,12 +16,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    spark = (
-        SparkSession
-        .builder.appName("SparkPipeline")
-        .getOrCreate()
-
-    )
+    spark = SparkSession.builder.appName("SparkPipeline").getOrCreate()
 
     validated_metadata = DataFlow.model_validate(json.loads(args.metadata))
 
@@ -30,7 +25,7 @@ if __name__ == "__main__":
         metadata=validated_metadata,
         kafka_broker=args.kafka_broker,
         hdfs_host=args.hdfs_host,
-        hdfs_port=args.hdfs_port
+        hdfs_port=args.hdfs_port,
     ).run()
 
     spark.stop()
